@@ -27,6 +27,17 @@ class ShoppingListController extends Controller
         return redirect()->route('shopping-list.index')->with('success', 'Item added.');
     }
 
+    public function update(Request $request, ShoppingListItem $item)
+    {
+        $data = $request->validate([
+            'is_completed' => 'required|boolean',
+        ]);
+
+        $item->update(['is_completed' => $data['is_completed']]);
+
+        return redirect()->route('shopping-list.index')->with('success', 'Item updated.');
+    }
+
     public function destroy(ShoppingListItem $item)
     {
         $item->delete();
