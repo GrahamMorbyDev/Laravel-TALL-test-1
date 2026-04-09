@@ -7,11 +7,30 @@ use Illuminate\Http\Request;
 
 class ShoppingListController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $items = ShoppingListItem::orderBy('created_at', 'desc')->get();
+        $status = $request->query('status', 'all'); // all | active | completed
+        $category = $request->query('category');
 
-        return view('shopping-list', compact('items'));
+        $query = ShoppingListItem::query();
+
+        // Category filter
+        if (!empty($category) && $category !== 'All') {
+            $query->where('category', $category);
+        }
+
+        // Status filter
+        if ($status === 'active') {
+            $query->where('is_completed', false);
+        } elseif ($status === 'completed') {
+            $query->where('is_completed', true);
+        }
+
+        $items = $query->orderBy('created_at', 'desc')->get();
+
+        $categories = ShoppingListItem::CATEGORIES;
+
+        return view('shopping-list', compact('items', 'categories', 'category', 'status'));
     }
 
     public function store(Request $request)
@@ -20,7 +39,13 @@ class ShoppingListController extends Controller
             'name' => 'required|string|max:255',
             'quantity' => 'required|integer|min:1',
             'notes' => 'nullable|string',
+            'category' => 'required|string|in:Fruit & Veg,Dairy,Frozen,Bakery,Household,Other',
         ]);
+
+        // Ensure category falls back to Other if somehow missing
+        if (empty($data['category'])) {
+            $data['category'] = 'Other';
+        }
 
         ShoppingListItem::create($data);
 
