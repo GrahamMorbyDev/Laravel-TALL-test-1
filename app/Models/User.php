@@ -29,4 +29,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * User has many shopping list items.
+     */
+    public function shoppingListItems()
+    {
+        return $this->hasMany(ShoppingListItem::class);
+    }
 }
