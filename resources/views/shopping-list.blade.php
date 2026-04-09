@@ -20,20 +20,22 @@
         @foreach($items as $item)
             <li class="flex items-center justify-between py-3">
                 <div class="flex items-center space-x-3">
-                    <form method="POST" action="{{ route('shopping-list.update', $item) }}">
+                    <form method="POST" action="{{ route('shopping-list.update', $item) }}"
+                          x-data="{ completed: {{ $item->is_completed ? 'true' : 'false' }}, loading: false, action: '{{ route('shopping-list.update', $item) }}', async send() { loading = true; try { const res = await fetch(this.action, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ is_completed: this.completed ? 1 : 0, _method: 'PATCH' }) }); if (!res.ok) throw new Error('Network'); } catch (e) { this.completed = !this.completed; alert('Unable to update item.'); } finally { loading = false; } } }"
+                          @submit.prevent>
                         @csrf
                         @method('PATCH')
-                        <input type="hidden" name="is_completed" value="{{ $item->is_completed ? '0' : '1' }}" />
-                        <input id="toggle-{{ $item->id }}" type="checkbox" {{ $item->is_completed ? 'checked' : '' }} onchange="this.form.submit()" class="h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+                        <input type="hidden" name="is_completed" :value="completed ? 1 : 0" />
+                        <input id="toggle-{{ $item->id }}" type="checkbox" :checked="completed" x-model="completed" @change="send()" :disabled="loading" class="h-4 w-4 text-indigo-600 border-gray-300 rounded" />
                     </form>
 
                     <div class="min-w-0">
                         <div class="flex items-baseline space-x-2">
-                            <span class="font-medium {{ $item->is_completed ? 'line-through text-gray-400' : '' }}">{{ $item->name }}</span>
+                            <span class="font-medium {{ $item->is_completed ? 'line-through text-gray-400' : '' }}" :class="completed ? 'line-through text-gray-400' : ''">{{ $item->name }}</span>
                             <span class="text-sm text-gray-500">x{{ $item->quantity }}</span>
                         </div>
                         @if($item->notes)
-                            <div class="text-sm {{ $item->is_completed ? 'text-gray-400' : 'text-gray-600' }}">{{ $item->notes }}</div>
+                            <div class="text-sm {{ $item->is_completed ? 'text-gray-400' : 'text-gray-600' }}" :class="completed ? 'text-gray-400' : 'text-gray-600'">{{ $item->notes }}</div>
                         @endif
                     </div>
                 </div>
