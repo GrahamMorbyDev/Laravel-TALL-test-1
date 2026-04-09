@@ -13,5 +13,15 @@ class ShoppingListItem extends Model
         'name',
         'quantity',
         'notes',
+        'is_completed',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string,string>
+     */
+    protected $casts = [
+        'is_completed' => 'boolean',
     ];
 }
